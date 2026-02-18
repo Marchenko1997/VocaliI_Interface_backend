@@ -6,7 +6,7 @@ from .models import User
 from .schemas import *
 from .auth_utils import *
 from datetime import datetime, timedelta
-from .main import security
+from .security import security
 from fastapi.security import  HTTPAuthorizationCredentials
 
 
