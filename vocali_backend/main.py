@@ -9,10 +9,23 @@ from contextlib import asynccontextmanager
 from .database import init_db, get_session
 from .routes import router
 from .models import Base
-
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 app.include_router(router, prefix="/auth", tags=["auth"])
 
 
