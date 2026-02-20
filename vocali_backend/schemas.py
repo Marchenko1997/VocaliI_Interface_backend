@@ -50,3 +50,42 @@ class ConfirmForgotPassword(BaseModel):
 class Login(BaseModel):
     email: EmailStr
     password: str
+
+
+class Transcription(BaseModel):
+    language: str
+    text: str
+    status: str
+    completedAt: Optional[datetime] = None
+    wordCount: Optional[int] = None
+    method: Optional[str] = None
+    confidence: Optional[float] = None
+    characterCount: Optional[int] = None
+
+
+class AudioMetadata(BaseModel):
+    originalName: str
+    duration: int
+    extension: str
+    transcription: Transcription
+    fileSize: int
+    format: str
+    uploadedAt: datetime
+    mimeType: str
+
+
+class AudioFileOut(BaseModel):
+    userId: int
+    fileKey: str
+    fileName: str
+    fileSize: int
+    duration: int
+    format: str
+    uploadedAt: datetime
+    lastModified: datetime
+    status: str
+    metadata: AudioMetadata
+    downloadUrl: str
+
+    class Config:
+        from_attributes = True

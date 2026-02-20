@@ -7,9 +7,12 @@ from sqlalchemy import select
 import uvicorn
 from contextlib import asynccontextmanager
 from .database import init_db, get_session
-from .routes import router
+
 from .models import Base
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from .routes.auth import router as auth_router
+from .routes.audio import router as audio_router
 
 
 app = FastAPI()
@@ -26,8 +29,8 @@ app.add_middleware(
 )
 
 
-app.include_router(router, prefix="/auth", tags=["auth"])
-
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(audio_router, prefix="/audio", tags=["audio"])
 
 @app.on_event("startup")
 async def startup_event():

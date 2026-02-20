@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from .database import get_session
-from .models import User
-from .schemas import *
-from .auth_utils import *
+from ..database import get_session
+from ..models import User
+from ..schemas import *
+from ..auth_utils import *
 from datetime import datetime, timedelta
-from .security import security
+from ..security import security
 from fastapi.security import  HTTPAuthorizationCredentials
 
 
@@ -179,3 +179,4 @@ async def get_profile(
     access_token = credentials.credentials  
     user_out = user_to_out(user, access_token, auth_time)
     return {"user": user_out}
+
