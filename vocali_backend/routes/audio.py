@@ -10,6 +10,7 @@ from ..database import get_session
 from ..security import security
 from ..auth_utils import get_current_user
 from ..schemas import AudioFileOut, AudioMetadata, Transcription
+from fastapi import Query
 
 
 router = APIRouter()
@@ -98,3 +99,41 @@ async def get_audio_files(
 ]
 
 
+@router.delete("/files")
+async def delete_audio_file(
+    fileKey:str = Query(...),
+      credentials: HTTPAuthorizationCredentials = Depends(security), 
+      session: AsyncSession = Depends(get_session)
+):
+    user = await get_current_user(credentials.credentials, session)
+
+    if not user:
+        raise HTTPException(
+            status_code = 401,
+            detail = "Invalid token"
+        )
+    
+    result = await session.execute(
+        select(AudioFile).where(
+            AudioFile.file_key == fileKey,
+            AudioFile.user_id == user.id
+        )
+    )
+
+    audio = result.scalar_one_or_none()
+
+    if not audio:
+        raise HTTPException(
+            status_code = 404,
+            detail = "File not found"
+        )
+    
+    file_path = f"uploads/audio{audio.file_key}_{audio.file_name}"
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    await session.delete(audio)
+    await session.commit()
+
+    return {"message": "File deleted successfully"}
