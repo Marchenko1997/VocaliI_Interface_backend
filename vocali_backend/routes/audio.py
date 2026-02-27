@@ -1,4 +1,6 @@
-from sqlalchemy import select
+import requests
+
+from sqlalchemy import select, func
 from fastapi import UploadFile, File, APIRouter, Depends, HTTPException
 import os
 import uuid
@@ -11,6 +13,7 @@ from ..security import security
 from ..auth_utils import get_current_user
 from ..schemas import AudioFileOut, AudioMetadata, Transcription
 from fastapi import Query
+
 
 
 router = APIRouter()
@@ -53,8 +56,10 @@ async def upload_audio(
     return {"message": "File uploaded"}
 
 
-@router.get("/files", response_model=list[AudioFileOut])
+@router.get("/files")
 async def get_audio_files(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
     credentials: HTTPAuthorizationCredentials = Depends(security),
     session: AsyncSession = Depends(get_session),
 ):
@@ -62,41 +67,69 @@ async def get_audio_files(
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+  
+    offset = (page - 1) * limit
+
+   
+    total_result = await session.execute(
+        select(func.count()).select_from(AudioFile).where(AudioFile.user_id == user.id)
+    )
+    total_items = total_result.scalar_one()
+
+  
     result = await session.execute(
-        select(AudioFile).where(AudioFile.user_id == user.id)
+        select(AudioFile)
+        .where(AudioFile.user_id == user.id)
+        .order_by(AudioFile.uploaded_at.desc())
+        .offset(offset)
+        .limit(limit)
     )
 
     files = result.scalars().all()
 
-    return [
-    AudioFileOut(
-        userId=user.id,
-        fileKey=file.file_key,
-        fileName=file.file_name,
-        fileSize=file.file_size,
-        duration=file.duration or 0,
-        format=file.format,
-        uploadedAt=file.uploaded_at,
-        lastModified=file.uploaded_at,
-        status="ready",
-        metadata=AudioMetadata(
-            originalName=file.file_name,
-            duration=file.duration or 0,
-            extension=file.format,
-            transcription=Transcription(
-                language="en",
-                text="",
-                status="pending"
-            ),
+    items = [
+        AudioFileOut(
+            userId=user.id,
+            fileKey=file.file_key,
+            fileName=file.file_name,
             fileSize=file.file_size,
+            duration=file.duration or 0,
             format=file.format,
             uploadedAt=file.uploaded_at,
-            mimeType="audio/mpeg"
-        ),
-        downloadUrl=f"http://localhost:8000/uploads/{file.file_key}_{file.file_name}"
-    )
-    for file in files
-]
+            lastModified=file.uploaded_at,
+            status="ready",
+            metadata=AudioMetadata(
+                originalName=file.file_name,
+                duration=file.duration or 0,
+                extension=file.format,
+                transcription=Transcription(
+                    language="en",
+                    text="",
+                    status="pending"
+                ),
+                fileSize=file.file_size,
+                format=file.format,
+                uploadedAt=file.uploaded_at,
+                mimeType="audio/mpeg"
+            ),
+            downloadUrl=f"http://localhost:8000/uploads/{file.file_key}_{file.file_name}"
+        )
+        for file in files
+    ]
+
+    total_pages = (total_items + limit - 1) // limit
+
+    return {
+        "items": items,
+        "pagination": {
+            "page": page,
+            "limit": limit,
+            "totalItems": total_items,
+            "totalPages": total_pages,
+            "hasNextPage": page < total_pages,
+            "hasPreviousPage": page > 1,
+        }
+    }
 
 
 @router.delete("/files")
@@ -137,3 +170,5 @@ async def delete_audio_file(
     await session.commit()
 
     return {"message": "File deleted successfully"}
+
+
