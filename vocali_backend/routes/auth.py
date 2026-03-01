@@ -8,7 +8,7 @@ from ..auth_utils import *
 from datetime import datetime, timedelta
 from ..security import security
 from fastapi.security import  HTTPAuthorizationCredentials
-
+from ..email_service import send_confirmation_email
 
 router = APIRouter()
 
@@ -36,7 +36,7 @@ async def signup(user_data: UserCreate, session: AsyncSession = Depends(get_sess
     await session.commit()
     await session.refresh(user)
 
-    print(f"Confirmation code for {user_data.email}: {code}")
+    send_confirmation_email(user_data.email, code)
     return {"message": "User created, check email for confirmation code"}
 
 
