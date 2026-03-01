@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Email Confirmation</title>
+</head>
+
+<body style="margin:0;padding:0;background-color:#0f172a;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="padding:60px 20px;">
+  <tr>
+    <td align="center">
+
+      <table width="100%" cellpadding="0" cellspacing="0"
+        style="max-width:540px;
+               background-color:#1e1b4b;
+               border-radius:28px;
+               padding:0 40px 50px 40px;
+               box-shadow:0 25px 60px rgba(0,0,0,0.45);
+               color:#ffffff;">
+
+        <!-- Elegant Header Block -->
+        <tr>
+          <td align="center" style="padding-top:45px;padding-bottom:35px;">
+
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center"
+                  style="
+                    padding:14px 34px;
+                    border-radius:50px;
+                    background:linear-gradient(to right,#3b82f6,#9333ea);
+                    font-size:20px;
+                    font-weight:600;
+                    letter-spacing:1px;
+                    color:#ffffff;
+                    box-shadow:0 10px 30px rgba(147,51,234,0.3);">
+                  Vocali
+                </td>
+              </tr>
+            </table>
+
+            <div style="
+              margin-top:16px;
+              font-size:13px;
+              color:#a5b4fc;
+              letter-spacing:1px;
+              text-transform:uppercase;">
+              Email Verification
+            </div>
+
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td align="center">
+            <p style="
+              font-size:16px;
+              line-height:24px;
+              color:#e2e8f0;
+              margin:0 0 35px 0;">
+              Welcome! Use the code below to activate your account.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Code -->
+        <tr>
+          <td align="center">
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center"
+                  style="
+                    padding:22px 46px;
+                    border-radius:18px;
+                    background:linear-gradient(to right,#3b82f6,#9333ea);
+                    font-size:28px;
+                    font-weight:700;
+                    letter-spacing:8px;
+                    color:#ffffff;
+                    box-shadow:0 12px 30px rgba(147,51,234,0.25);">
+                  {{ code }}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Expiry -->
+        <tr>
+          <td align="center" style="padding-top:30px;">
+            <p style="font-size:14px;color:#94a3b8;margin:0;">
+              This code expires in 10 minutes.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td align="center" style="padding-top:40px;font-size:12px;color:#64748b;">
+            © {{ year }} Vocali. All rights reserved.
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

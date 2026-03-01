@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from vocali_backend.services.email_service import send_reset_password_email
 from ..database import get_session
 from ..models import User
 from ..schemas import *
@@ -8,14 +9,15 @@ from ..auth_utils import *
 from datetime import datetime, timedelta
 from ..security import security
 from fastapi.security import  HTTPAuthorizationCredentials
-from ..email_service import send_confirmation_email
+from ..services.email_service import send_confirmation_email
+from fastapi import BackgroundTasks
 
 router = APIRouter()
 
 
 
 @router.post("/signup")
-async def signup(user_data: UserCreate, session: AsyncSession = Depends(get_session)):
+async def signup(user_data: UserCreate, background_tasks: BackgroundTasks, session: AsyncSession = Depends(get_session)):
     existing = await session.execute(select(User).where(User.email == user_data.email))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -36,7 +38,11 @@ async def signup(user_data: UserCreate, session: AsyncSession = Depends(get_sess
     await session.commit()
     await session.refresh(user)
 
-    send_confirmation_email(user_data.email, code)
+    background_tasks.add_task(
+        send_confirmation_email,
+        user_data.email,
+        code
+    )
     return {"message": "User created, check email for confirmation code"}
 
 
@@ -83,7 +89,7 @@ async def confirm_signup(data:ConfirmSignup, session: AsyncSession = Depends(get
     }
 
 @router.post("/resend-confirmation-code")
-async def resend_confirmation(email_data: dict, session: AsyncSession = Depends(get_session)):
+async def resend_confirmation(email_data: dict, background_tasks: BackgroundTasks, session: AsyncSession = Depends(get_session)):
     user = await session.execute(
         select(User).where(
             User.email == email_data["email"],
@@ -104,14 +110,18 @@ async def resend_confirmation(email_data: dict, session: AsyncSession = Depends(
 
     await session.commit()
 
-    print(f"New code for {email_data['email']}: {code}")
+    background_tasks.add_task(
+        send_confirmation_email,
+        email_data["email"],
+        code
+)
 
     return {"message": "Code resent"}
 
 
 @router.post("/forgot-password")
 async def forgot_password(
-    email_data: ForgotPassword, session: AsyncSession = Depends(get_session)
+    email_data: ForgotPassword, background_tasks: BackgroundTasks, session: AsyncSession = Depends(get_session)
 ):
 
     user = await session.execute(select(User).where(User.email == email_data.email))
@@ -129,7 +139,11 @@ async def forgot_password(
 
     await session.commit()
 
-    print(f"Reset code for {email_data.email}: {code}")
+    background_tasks.add_task(
+        send_reset_password_email,
+        user.email,
+        code
+)
 
     return {"message": "Reset code sent to email"}
 
