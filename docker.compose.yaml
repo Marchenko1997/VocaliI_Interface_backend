@@ -11,6 +11,8 @@ services:
     depends_on:
       - db
     restart: always
+    volumes:
+      - ./uploads:/app/uploads
 
   db:
     image: postgres:16
