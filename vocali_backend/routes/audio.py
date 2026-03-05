@@ -112,7 +112,7 @@ async def get_audio_files(
                 uploadedAt=file.uploaded_at,
                 mimeType="audio/mpeg"
             ),
-            downloadUrl=f"http://localhost:8000/uploads/{file.file_key}_{file.file_name}"
+            downloadUrl=f"/uploads/{file.file_key}_{file.file_name}"
         )
         for file in files
     ]
