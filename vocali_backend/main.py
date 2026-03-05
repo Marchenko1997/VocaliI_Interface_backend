@@ -17,13 +17,10 @@ from .routes.audio import router as audio_router
 
 app = FastAPI()
 
-origins = [
-    "https://vocali-interface-git-main-galina-marchenkos-projects.vercel.app",
-]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origin_regex=r"https://vocali-interface.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
