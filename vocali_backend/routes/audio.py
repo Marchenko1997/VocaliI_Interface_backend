@@ -161,7 +161,7 @@ async def delete_audio_file(
             detail = "File not found"
         )
     
-    file_path = f"uploads/audio{audio.file_key}_{audio.file_name}"
+    file_path = f"uploads/{audio.file_key}_{audio.file_name}"
 
     if os.path.exists(file_path):
         os.remove(file_path)
