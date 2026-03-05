@@ -18,7 +18,7 @@ from .routes.audio import router as audio_router
 app = FastAPI()
 
 origins = [
-    "https://vocali-interface.vercel.app",
+    "https://vocali-interface-git-main-galina-marchenkos-projects.vercel.app",
 ]
 
 app.add_middleware(
