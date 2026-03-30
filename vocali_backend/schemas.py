@@ -89,3 +89,9 @@ class AudioFileOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SpotifyTrack(BaseModel):
+    name: str
+    artist: str
+    url: str

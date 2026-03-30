@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .routes.auth import router as auth_router
 from .routes.audio import router as audio_router
+from .routes.spotify import router as spotify_router
 
 
 app = FastAPI()
@@ -29,6 +30,8 @@ app.add_middleware(
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(audio_router, prefix="/audio", tags=["audio"])
+app.include_router(spotify_router, prefix="/spotify", tags=["spotify"])
+
 
 @app.on_event("startup")
 async def startup_event():
