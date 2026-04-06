@@ -48,7 +48,7 @@ async def get_spotify_token():
     return spotify_token_cache["access_token"]
 
 
-async def search_tracks(q: str):
+async def search_tracks(q: str, offset: int = 0, limit: int = 20):
     token = await get_spotify_token()
 
     async with httpx.AsyncClient() as client:
@@ -57,7 +57,8 @@ async def search_tracks(q: str):
             params={
                 "q": q,
                 "type": "track",
-                "limit": 5,
+                "limit": limit,      
+                "offset": offset,    
             },
             headers={
                 "Authorization": f"Bearer {token}"

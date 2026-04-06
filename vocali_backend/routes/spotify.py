@@ -7,5 +7,5 @@ router = APIRouter()
 
 
 @router.get("/search")
-async def search_spotify(q: str):
-    return await search_tracks(q)
+async def search_spotify(q: str, offset: int = 0, limit: int = 20):
+    return await search_tracks(q, offset, limit)
