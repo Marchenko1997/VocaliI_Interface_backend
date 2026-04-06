@@ -51,8 +51,10 @@ async def get_spotify_token():
 async def search_tracks(q: str, offset: int = 0, limit: int = 20):
     token = await get_spotify_token()
 
+   
     limit = min(max(int(limit), 1), 50)
     offset = max(int(offset), 0)
+    print(f"DEBUG: q={q!r}, limit={limit!r} ({type(limit)}), offset={offset!r}")
 
     async with httpx.AsyncClient() as client:
         res = await client.get(
@@ -60,12 +62,10 @@ async def search_tracks(q: str, offset: int = 0, limit: int = 20):
             params={
                 "q": q,
                 "type": "track",
-                "limit": limit,
-                "offset": offset,
+                "limit": int(limit),   
+                "offset": int(offset),
             },
-            headers={
-                "Authorization": f"Bearer {token}"
-            },
+            headers={"Authorization": f"Bearer {token}"},
         )
 
     return res.json()
