@@ -3,11 +3,14 @@ from typing import Optional
 import secrets
 from passlib.context import CryptContext
 from jose import JWTError, jwt
-
+from fastapi import Depends
 from .models import User
 from .schemas import UserOut
 import os
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from .database import get_session
+
 
 
 pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
@@ -46,7 +49,7 @@ def create_refresh_token(sub: str):
     return encoded_jwt
 
 
-async def get_current_user(token: str, session):
+async def get_current_user(token: str, session: AsyncSession = Depends(get_session)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
