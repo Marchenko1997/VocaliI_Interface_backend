@@ -14,14 +14,24 @@ async def parse_playlist_intent(prompt: str) -> dict:
                 "messages": [
                     {
                         "role": "system",
-                        "content": """You are a music assistant. Parse the user's playlist request and return JSON only:
-                        {
-                          "search_query": "spotify search string",
-                          "genre": "lofi/chill/etc",
-                          "bpm_hint": "slow/medium/fast",
-                          "duration_minutes": 120,
-                          "tracks_needed": 30
-                        }"""
+                        "content": """You are a music assistant. Parse the user's playlist request and return JSON only.
+
+IMPORTANT: Calculate tracks_needed based on duration (average track = 3 minutes):
+- 30 minutes = 10 tracks
+- 1 hour = 20 tracks
+- 2 hours = 40 tracks
+- 3 hours = 60 tracks
+
+For search_query: use genre + mood keywords in English, never use the word 'playlist'.
+
+Return exactly this JSON:
+{
+  "search_query": "spotify search string",
+  "genre": "detected genre",
+  "bpm_hint": "slow/medium/fast",
+  "duration_minutes": 120,
+  "tracks_needed": 40
+}"""
                     },
                     {"role": "user", "content": prompt}
                 ],
@@ -29,4 +39,4 @@ async def parse_playlist_intent(prompt: str) -> dict:
             }
         )
         content = response.json()["choices"][0]["message"]["content"]
-        return json.loads(content)  
+        return json.loads(content)
