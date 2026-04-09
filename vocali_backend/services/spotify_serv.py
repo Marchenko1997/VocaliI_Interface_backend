@@ -68,4 +68,13 @@ async def search_tracks(q: str, offset: int = 0, limit: int = 20):
             headers={"Authorization": f"Bearer {token}"},
         )
 
+    if res.status_code != 200:
+        print(f"Spotify error: {res.status_code} | {res.text}")
+        return {"tracks": {"items": []}}
+
+    if not res.content:
+        print("Spotify returned empty response")
+        return {"tracks": {"items": []}}
+
+
     return res.json()
