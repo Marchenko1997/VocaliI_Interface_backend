@@ -35,7 +35,7 @@ Return exactly this JSON:
                     },
                     {"role": "user", "content": prompt}
                 ],
-                "response_format": {"type": "json_object"}
+                
             }
         )
         content = response.json()["choices"][0]["message"]["content"]
