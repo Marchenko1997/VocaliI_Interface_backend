@@ -9,6 +9,7 @@ REST API for the Vocali audio platform -- handles user authentication, audio fil
 - **Password reset** -- forgot/confirm password flow with email codes
 - **Audio management** -- upload, list (paginated), delete audio files per user
 - **Spotify integration** -- search tracks via Spotify Web API (client credentials)
+- **AI playlist generation** -- natural language prompt to curated Spotify track list via OpenRouter
 - **Async everywhere** -- async database access with SQLAlchemy + asyncpg
 
 ## Tech Stack
@@ -24,6 +25,7 @@ REST API for the Vocali audio platform -- handles user authentication, audio fil
 | Validation | Pydantic v2 |
 | Email | Brevo API (sib-api-v3-sdk) + Jinja2 templates |
 | Spotify | httpx (async HTTP client) |
+| AI | OpenRouter API (openai/gpt-oss-120b) |
 | Containerization | Docker + Docker Compose |
 
 ## Project Structure
@@ -40,9 +42,11 @@ vocali_backend/
     auth.py            # Auth endpoints (signup, signin, confirm, reset)
     audio.py           # Audio file endpoints (upload, list, delete)
     spotify.py         # Spotify search endpoint
+    ai.py              # AI playlist generation endpoint
   services/
     email_service.py   # Brevo transactional email sender
     spotify_serv.py    # Spotify token caching and track search
+    ai_service.py      # OpenRouter AI intent parsing
   templates/
     confirmation.html  # Email verification template
     reset_password.html# Password reset template
@@ -110,6 +114,7 @@ This starts the backend on port `8000` and PostgreSQL on the default port.
 | `BREVO_SENDER_EMAIL` | Sender email address for outgoing emails |
 | `SPOTIFY_CLIENT_ID` | Spotify app client ID |
 | `SPOTIFY_CLIENT_SECRET` | Spotify app client secret |
+| `OPENROUTER_API_KEY` | OpenRouter API key for AI playlist generation |
 
 ## API Endpoints
 
@@ -139,3 +144,16 @@ This starts the backend on port `8000` and PostgreSQL on the default port.
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/spotify/search` | Search Spotify tracks by query |
+
+### AI Playlist (`/ai`)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/ai/playlist` | Generate a playlist from a natural language prompt |
+
+Accepts `{ "prompt": "2 hours of chill lo-fi beats" }` (bearer token required). The request flows through two services:
+
+1. **`ai_service.py`** -- sends the prompt to OpenRouter (`openai/gpt-oss-120b`) which extracts `genre`, `bpm_hint`, `duration_minutes`, `tracks_needed`, and a `search_query`. The AI response is parsed as JSON.
+2. **`spotify_serv.py`** -- uses the extracted `search_query` to fetch tracks from Spotify in batches (token caching with auto-refresh, graceful handling of 401 and empty responses).
+
+Returns `{ "ai_params": { ... }, "tracks": [ ... ] }` with the requested number of tracks.
