@@ -51,10 +51,8 @@ async def get_spotify_token():
 async def search_tracks(q: str, offset: int = 0, limit: int = 20):
     token = await get_spotify_token()
 
-   
     limit = min(max(int(limit), 1), 10)
     offset = max(int(offset), 0)
-    
 
     async with httpx.AsyncClient() as client:
         res = await client.get(
@@ -76,5 +74,20 @@ async def search_tracks(q: str, offset: int = 0, limit: int = 20):
         print("Spotify returned empty response")
         return {"tracks": {"items": []}}
 
+    return res.json()
+
+
+
+async def get_artist_by_id(artist_id: str):
+    token = await get_spotify_token()
+
+    async with httpx.AsyncClient() as client:
+        res = await client.get(
+            f"https://api.spotify.com/v1/artists/{artist_id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    if res.status_code != 200 or not res.content:
+        return {}
 
     return res.json()
